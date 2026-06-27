@@ -27,6 +27,9 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
+        with:
+          # 워크플로가 직접 Pages 기능을 켜고 소스를 'GitHub Actions'로 설정
+          enablement: true
 
       - name: Upload artifact (repository root)
         uses: actions/upload-pages-artifact@v3
