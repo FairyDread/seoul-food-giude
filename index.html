@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>서울 맛집 가이드 · Seoul Food Guide</title>
+<meta name="description" content="서울의 엄선된 맛집 12곳 — 평점, 가격대, 위치, 대표메뉴를 한눈에." />
+<style>
+  :root{
+    --bg:#fdf6ef;
+    --bg-soft:#fbeee0;
+    --card:#ffffff;
+    --ink:#3d2c1e;
+    --ink-soft:#7a6555;
+    --line:#efe2d4;
+    --brand:#e07a40;
+    --brand-deep:#c85d2a;
+    --gold:#f2a93b;
+    --shadow:0 10px 30px rgba(120,72,40,.10);
+    --radius:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #ffe9d3 0%, transparent 60%),
+      radial-gradient(900px 500px at -10% 10%, #ffe2cf 0%, transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    line-height:1.55;
+    min-height:100vh;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+
+  /* Header */
+  header.hero{
+    text-align:center;
+    padding:64px 20px 30px;
+  }
+  .hero .kicker{
+    display:inline-block;
+    font-size:13px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--brand-deep);font-weight:700;
+    background:#fff;border:1px solid var(--line);
+    padding:6px 14px;border-radius:999px;margin-bottom:18px;
+    box-shadow:var(--shadow);
+  }
+  .hero h1{
+    font-size:clamp(30px,5vw,50px);
+    font-weight:800;letter-spacing:-.02em;
+    background:linear-gradient(135deg,#c85d2a,#e07a40 55%,#f2a93b);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    margin-bottom:12px;
+  }
+  .hero p{color:var(--ink-soft);font-size:17px;max-width:560px;margin:0 auto}
+
+  /* Controls */
+  .controls{
+    position:sticky;top:0;z-index:20;
+    background:rgba(253,246,239,.82);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line);
+    padding:16px 0;margin-top:14px;
+  }
+  .controls .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .search{
+    flex:1 1 280px;position:relative;
+  }
+  .search input{
+    width:100%;padding:13px 16px 13px 44px;
+    border:1px solid var(--line);border-radius:999px;
+    background:#fff;font-size:15px;color:var(--ink);
+    box-shadow:var(--shadow);outline:none;transition:.2s;
+  }
+  .search input:focus{border-color:var(--brand);box-shadow:0 0 0 4px rgba(224,122,64,.15)}
+  .search svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--ink-soft)}
+  .sort select{
+    padding:13px 16px;border:1px solid var(--line);border-radius:999px;
+    background:#fff;font-size:15px;color:var(--ink);cursor:pointer;
+    box-shadow:var(--shadow);outline:none;
+  }
+  .filters{display:flex;flex-wrap:wrap;gap:8px;padding:14px 0 2px}
+  .chip{
+    border:1px solid var(--line);background:#fff;color:var(--ink-soft);
+    padding:8px 16px;border-radius:999px;font-size:14px;font-weight:600;
+    cursor:pointer;transition:.18s;
+  }
+  .chip:hover{border-color:var(--brand);color:var(--brand-deep)}
+  .chip.active{background:linear-gradient(135deg,#e07a40,#c85d2a);color:#fff;border-color:transparent;box-shadow:0 6px 16px rgba(200,93,42,.30)}
+
+  .meta-line{padding:14px 0 4px;color:var(--ink-soft);font-size:14px}
+
+  /* Grid */
+  .grid{
+    display:grid;gap:22px;
+    grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+    padding:6px 0 60px;
+  }
+  .card{
+    background:var(--card);border:1px solid var(--line);
+    border-radius:var(--radius);overflow:hidden;
+    box-shadow:var(--shadow);
+    display:flex;flex-direction:column;
+    transition:transform .22s ease, box-shadow .22s ease;
+  }
+  .card:hover{transform:translateY(-5px);box-shadow:0 18px 40px rgba(120,72,40,.16)}
+  .thumb{
+    position:relative;height:185px;
+    background-size:cover;background-position:center;
+    display:flex;align-items:flex-end;
+  }
+  .thumb .emoji-fallback{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:64px;background:linear-gradient(135deg,#ffd9b5,#ffb88a);
+  }
+  .badge-cat{
+    position:absolute;top:12px;left:12px;
+    background:rgba(255,255,255,.92);color:var(--brand-deep);
+    font-size:12px;font-weight:700;padding:5px 11px;border-radius:999px;
+    backdrop-filter:blur(4px);
+  }
+  .badge-rate{
+    position:absolute;top:12px;right:12px;
+    background:rgba(61,44,30,.82);color:#ffd98a;
+    font-size:13px;font-weight:700;padding:5px 10px;border-radius:999px;
+    display:flex;align-items:center;gap:4px;backdrop-filter:blur(4px);
+  }
+  .card-body{padding:18px;display:flex;flex-direction:column;gap:11px;flex:1}
+  .card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .card-head h3{font-size:19px;font-weight:800;letter-spacing:-.01em}
+  .price{color:var(--brand-deep);font-weight:700;font-size:14px;white-space:nowrap}
+  .stars{color:var(--gold);font-size:15px;letter-spacing:1px}
+  .stars span{color:#e8d8c8}
+  .stars .num{color:var(--ink-soft);font-size:13px;margin-left:6px;letter-spacing:0}
+  .signature{
+    background:var(--bg-soft);border-radius:12px;padding:9px 12px;
+    font-size:14px;color:var(--ink);
+  }
+  .signature b{color:var(--brand-deep)}
+  .info{list-style:none;display:flex;flex-direction:column;gap:7px;font-size:14px;color:var(--ink-soft)}
+  .info li{display:flex;gap:9px;align-items:flex-start}
+  .info .ic{flex:none;width:18px;text-align:center;color:var(--brand)}
+  .actions{display:flex;gap:10px;margin-top:auto;padding-top:6px}
+  .btn{
+    flex:1;text-align:center;text-decoration:none;
+    padding:11px 12px;border-radius:12px;font-size:14px;font-weight:700;
+    cursor:pointer;transition:.18s;border:1px solid transparent;
+  }
+  .btn-map{background:linear-gradient(135deg,#e07a40,#c85d2a);color:#fff;box-shadow:0 6px 16px rgba(200,93,42,.28)}
+  .btn-map:hover{filter:brightness(1.05);transform:translateY(-1px)}
+  .btn-call{background:#fff;color:var(--brand-deep);border-color:var(--line)}
+  .btn-call:hover{border-color:var(--brand);background:var(--bg-soft)}
+
+  .empty{
+    text-align:center;padding:70px 20px;color:var(--ink-soft);
+    grid-column:1/-1;
+  }
+  .empty .big{font-size:48px;margin-bottom:10px}
+
+  footer{
+    text-align:center;padding:34px 20px 50px;color:var(--ink-soft);
+    border-top:1px solid var(--line);font-size:14px;
+  }
+  footer b{color:var(--brand-deep)}
+
+  @media (max-width:600px){
+    header.hero{padding:42px 16px 18px}
+    .grid{grid-template-columns:1fr}
+    .sort{flex:1 1 100%}
+    .sort select{width:100%}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="kicker">🍜 Seoul Food Guide</span>
+  <h1>서울 맛집 가이드</h1>
+  <p>발품 팔아 엄선한 서울의 맛집 12곳. 평점·가격대·위치·대표메뉴를 한눈에 살펴보고 바로 길찾기와 전화 예약까지.</p>
+</header>
+
+<div class="controls">
+  <div class="wrap">
+    <div class="row">
+      <div class="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="searchInput" type="search" placeholder="가게 이름, 메뉴, 동네로 검색해보세요…" />
+      </div>
+      <div class="sort">
+        <select id="sortSelect" aria-label="정렬">
+          <option value="rating">평점 높은순</option>
+          <option value="name">이름순 (가나다)</option>
+          <option value="priceAsc">가격 낮은순</option>
+          <option value="priceDesc">가격 높은순</option>
+        </select>
+      </div>
+    </div>
+    <div class="filters" id="filters">
+      <button class="chip active" data-cat="전체">전체</button>
+      <button class="chip" data-cat="한식">한식</button>
+      <button class="chip" data-cat="고기">고기</button>
+      <button class="chip" data-cat="면">면</button>
+      <button class="chip" data-cat="양식">양식</button>
+      <button class="chip" data-cat="카페">카페</button>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+  <div class="meta-line" id="metaLine"></div>
+  <section class="grid" id="grid"></section>
+</main>
+
+<footer>
+  <p>🧡 <b>서울 맛집 가이드</b> · 평점은 방문자 후기를 종합한 참고용 지표입니다.</p>
+  <p style="margin-top:6px;opacity:.8">© 2026 Seoul Food Guide · Made with care</p>
+</footer>
+
+<script>
+const restaurants = [
+  {
+    name:"광장시장 박가네 빈대떡", cat:"한식", emoji:"🥘",
+    rating:4.7, price:3, priceLabel:"₩₩ · 1만원대",
+    addr:"서울 종로구 창경궁로 88 광장시장",
+    phone:"02-2272-1234",
+    hours:"매일 09:00 – 22:00",
+    signature:"녹두 빈대떡 · 마약김밥",
+    img:"https://images.unsplash.com/photo-1583224964978-2257b960c3d3?w=800&q=80"
+  },
+  {
+    name:"마포 진짜원조 돼지갈비", cat:"고기", emoji:"🍖",
+    rating:4.6, price:4, priceLabel:"₩₩₩ · 2~3만원대",
+    addr:"서울 마포구 백범로 23",
+    phone:"02-715-5678",
+    hours:"매일 11:30 – 23:00",
+    signature:"양념 돼지갈비 · 된장찌개",
+    img:"https://images.unsplash.com/photo-1632558610046-7d1d6a3c0d3c?w=800&q=80"
+  },
+  {
+    name:"을지면옥", cat:"면", emoji:"🍜",
+    rating:4.5, price:3, priceLabel:"₩₩ · 1만원대",
+    addr:"서울 중구 충무로14길 2-1",
+    phone:"02-2266-7894",
+    hours:"매일 11:00 – 21:30 (브레이크 15:30-16:30)",
+    signature:"평양냉면 · 제육",
+    img:"https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&q=80"
+  },
+  {
+    name:"성수동 라 트라토리아", cat:"양식", emoji:"🍝",
+    rating:4.8, price:5, priceLabel:"₩₩₩₩ · 4만원대",
+    addr:"서울 성동구 연무장길 45",
+    phone:"02-466-1199",
+    hours:"화–일 12:00 – 22:00 (월 휴무)",
+    signature:"트러플 까르보나라 · 마르게리타",
+    img:"https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=800&q=80"
+  },
+  {
+    name:"안국동 소소한 커피", cat:"카페", emoji:"☕",
+    rating:4.6, price:2, priceLabel:"₩ · 5천~1만원",
+    addr:"서울 종로구 율곡로 79-1",
+    phone:"02-733-2020",
+    hours:"매일 10:00 – 22:00",
+    signature:"핸드드립 · 흑임자 라떼",
+    img:"https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&q=80"
+  },
+  {
+    name:"북창동 순두부", cat:"한식", emoji:"🍲",
+    rating:4.4, price:3, priceLabel:"₩₩ · 1만원대",
+    addr:"서울 중구 남대문로1길 33",
+    phone:"02-755-3030",
+    hours:"매일 08:00 – 21:00",
+    signature:"얼큰 순두부찌개 · 굴보쌈",
+    img:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=800&q=80"
+  },
+  {
+    name:"한남동 우대갈비 본점", cat:"고기", emoji:"🥩",
+    rating:4.9, price:5, priceLabel:"₩₩₩₩ · 5만원대",
+    addr:"서울 용산구 이태원로 199",
+    phone:"02-790-4040",
+    hours:"매일 17:00 – 24:00",
+    signature:"우대갈비 · 평양냉면",
+    img:"https://images.unsplash.com/photo-1558030006-450675393462?w=800&q=80"
+  },
+  {
+    name:"연남동 칼국수 한그릇", cat:"면", emoji:"🍲",
+    rating:4.3, price:2, priceLabel:"₩ · 1만원 이하",
+    addr:"서울 마포구 동교로 248",
+    phone:"02-336-5050",
+    hours:"매일 11:00 – 21:00",
+    signature:"바지락 칼국수 · 왕만두",
+    img:"https://images.unsplash.com/photo-1612927601601-6638404737ce?w=800&q=80"
+  },
+  {
+    name:"청담 르 쁘띠 비스트로", cat:"양식", emoji:"🍷",
+    rating:4.7, price:5, priceLabel:"₩₩₩₩ · 6만원대",
+    addr:"서울 강남구 도산대로 423",
+    phone:"02-548-6060",
+    hours:"화–일 18:00 – 23:00 (월 휴무)",
+    signature:"스테이크 프리츠 · 양고기 라구",
+    img:"https://images.unsplash.com/photo-1544025162-d76694265947?w=800&q=80"
+  },
+  {
+    name:"익선동 뜨락 한옥카페", cat:"카페", emoji:"🍵",
+    rating:4.5, price:2, priceLabel:"₩ · 7천~1만원",
+    addr:"서울 종로구 수표로28길 33-5",
+    phone:"02-765-7070",
+    hours:"매일 11:00 – 23:00",
+    signature:"쑥 라떼 · 인절미 빙수",
+    img:"https://images.unsplash.com/photo-1525193612562-0ec53b0e5d7c?w=800&q=80"
+  },
+  {
+    name:"신당동 즉석 떡볶이", cat:"한식", emoji:"🌶️",
+    rating:4.4, price:2, priceLabel:"₩ · 1만원대 (2인)",
+    addr:"서울 중구 다산로35길 5",
+    phone:"02-2232-8080",
+    hours:"매일 11:00 – 23:30",
+    signature:"즉석 떡볶이 · 쫄면 사리",
+    img:"https://images.unsplash.com/photo-1635963662203-72ace0bd3d3c?w=800&q=80"
+  },
+  {
+    name:"강남 멘야 하나비 라멘", cat:"면", emoji:"🍥",
+    rating:4.6, price:3, priceLabel:"₩₩ · 1만원대",
+    addr:"서울 강남구 강남대로98길 12",
+    phone:"02-3445-9090",
+    hours:"매일 11:00 – 22:00",
+    signature:"마제소바 · 돈코츠 라멘",
+    img:"https://images.unsplash.com/photo-1591814468924-caf88d1232e1?w=800&q=80"
+  }
+];
+
+const grid = document.getElementById('grid');
+const metaLine = document.getElementById('metaLine');
+const searchInput = document.getElementById('searchInput');
+const sortSelect = document.getElementById('sortSelect');
+const filtersEl = document.getElementById('filters');
+
+let state = { cat:"전체", q:"", sort:"rating" };
+
+function starHTML(rating){
+  const full = Math.round(rating);
+  let s = "";
+  for(let i=1;i<=5;i++){ s += i<=full ? "★" : "<span>★</span>"; }
+  return `<span class="stars">${s}<span class="num">${rating.toFixed(1)}</span></span>`;
+}
+
+function cardHTML(r){
+  const telDigits = r.phone.replace(/[^0-9]/g,'');
+  const mapUrl = "https://map.kakao.com/?q=" + encodeURIComponent(r.name + " " + r.addr);
+  return `
+  <article class="card">
+    <div class="thumb" style="background-image:url('${r.img}')">
+      <div class="emoji-fallback" style="display:none">${r.emoji}</div>
+      <img src="${r.img}" alt="" style="display:none" onerror="this.parentElement.querySelector('.emoji-fallback').style.display='flex'">
+      <span class="badge-cat">${r.cat}</span>
+      <span class="badge-rate">⭐ ${r.rating.toFixed(1)}</span>
+    </div>
+    <div class="card-body">
+      <div class="card-head">
+        <h3>${r.name}</h3>
+        <span class="price">${r.priceLabel.split(' · ')[0]}</span>
+      </div>
+      ${starHTML(r.rating)}
+      <div class="signature">🍽️ <b>대표메뉴</b> · ${r.signature}</div>
+      <ul class="info">
+        <li><span class="ic">📍</span><span>${r.addr}</span></li>
+        <li><span class="ic">📞</span><span>${r.phone}</span></li>
+        <li><span class="ic">🕒</span><span>${r.hours}</span></li>
+        <li><span class="ic">💳</span><span>${r.priceLabel}</span></li>
+      </ul>
+      <div class="actions">
+        <a class="btn btn-map" href="${mapUrl}" target="_blank" rel="noopener">🗺️ 지도 보기</a>
+        <a class="btn btn-call" href="tel:${telDigits}">📞 전화하기</a>
+      </div>
+    </div>
+  </article>`;
+}
+
+function render(){
+  let list = restaurants.filter(r=>{
+    const matchCat = state.cat==="전체" || r.cat===state.cat;
+    const q = state.q.trim().toLowerCase();
+    const matchQ = !q ||
+      r.name.toLowerCase().includes(q) ||
+      r.signature.toLowerCase().includes(q) ||
+      r.addr.toLowerCase().includes(q) ||
+      r.cat.toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+
+  list.sort((a,b)=>{
+    switch(state.sort){
+      case "name": return a.name.localeCompare(b.name,'ko');
+      case "priceAsc": return a.price-b.price || b.rating-a.rating;
+      case "priceDesc": return b.price-a.price || b.rating-a.rating;
+      default: return b.rating-a.rating;
+    }
+  });
+
+  metaLine.textContent = `${list.length}곳의 맛집` + (state.cat!=="전체"? ` · ${state.cat}`:"") + (state.q? ` · "${state.q}" 검색`:"");
+
+  if(list.length===0){
+    grid.innerHTML = `<div class="empty"><div class="big">🍽️</div><p>조건에 맞는 맛집이 없어요.<br>검색어나 필터를 바꿔보세요.</p></div>`;
+    return;
+  }
+  grid.innerHTML = list.map(cardHTML).join('');
+}
+
+filtersEl.addEventListener('click', e=>{
+  const chip = e.target.closest('.chip');
+  if(!chip) return;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  chip.classList.add('active');
+  state.cat = chip.dataset.cat;
+  render();
+});
+searchInput.addEventListener('input', e=>{ state.q = e.target.value; render(); });
+sortSelect.addEventListener('change', e=>{ state.sort = e.target.value; render(); });
+
+render();
+</script>
+</body>
+</html>
